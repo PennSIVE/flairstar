@@ -15,8 +15,11 @@ argv <- parse_args(p)
 flair = readnii("/flair.nii.gz")
 epi = readnii("/epi.nii.gz")
 
+flair_n4 = bias_correct(file = flair, correction = "N4")
+epi_n4 = bias_correct(file = epi, correction = "N4")
+
 # co-register the FLAIR to the EPI
-flair_reg2epi = registration(filename = oro2ants(flair), template.file = oro2ants(epi), typeofTransform = "Rigid", interpolator = "welchWindowedSinc")$outfile
+flair_reg2epi = registration(filename = oro2ants(flair_n4), template.file = oro2ants(epi_n4), typeofTransform = "Rigid", interpolator = "welchWindowedSinc")$outfile
 # now multiply the epi and registered flair to get the flair*
-flairstar = flair_reg2epi * epi
+flairstar = flair_reg2epi * epi_n4
 writenii(flairstar, paste0("/out/", argv$out))
